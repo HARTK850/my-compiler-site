@@ -20,7 +20,7 @@ jobs:
           gcc source/*.c -o output || echo "Compilation Failed" > output.txt
 
       - name: Upload Compilation Result
-        run: |
+        run: |https://github.com/HARTK850/my-compiler-site/actions
           if [ -f output ]; then
             echo "✅ Compilation Succeeded!" >> $GITHUB_STEP_SUMMARY
             echo '```' >> $GITHUB_STEP_SUMMARY
