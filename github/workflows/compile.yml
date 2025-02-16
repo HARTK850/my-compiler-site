@@ -1,0 +1,32 @@
+name: Compile ZIP Code
+on:
+  issues:
+    types: [opened]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Download ZIP from issue
+        run: |
+          curl -L $(jq -r '.issue.body' $GITHUB_EVENT_PATH | grep -oP 'https://[^\s]+' | head -n 1) -o code.zip
+          unzip code.zip -d source
+
+      - name: Compile Code
+        run: |
+          gcc source/*.c -o output || echo "Compilation Failed" > output.txt
+
+      - name: Upload Compilation Result
+        run: |
+          if [ -f output ]; then
+            echo "✅ Compilation Succeeded!" >> $GITHUB_STEP_SUMMARY
+            echo '```' >> $GITHUB_STEP_SUMMARY
+            ./output >> $GITHUB_STEP_SUMMARY
+            echo '```' >> $GITHUB_STEP_SUMMARY
+          else
+            echo "❌ Compilation Failed!" >> $GITHUB_STEP_SUMMARY
+            cat output.txt >> $GITHUB_STEP_SUMMARY
+          fi
