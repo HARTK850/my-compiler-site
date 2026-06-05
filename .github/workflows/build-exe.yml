@@ -16,13 +16,19 @@ jobs:
       uses: graalvm/setup-graalvm@v1
       with:
         java-version: '21'
-        distribution: 'liberica' # שינוי ל-liberica שתומך בגרפיקה על ווינדוס
+        distribution: 'liberica'
         github-token: ${{ secrets.GITHUB_TOKEN }}
 
     - name: Compile Java Code
       run: |
         javac RacingGame.java
 
-    - name: Convert to GUI Windows EXE
+    - name: Convert to EXE
       run: |
-        native-image --no-fallback -H:Kind=WINDOWS_GUI -cp . RacingGame
+        native-image --no-fallback -cp . RacingGame
+
+    - name: Upload EXE Artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: RacingGame-Windows-EXE
+        path: RacingGame.exe
