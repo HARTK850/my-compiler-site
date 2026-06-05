@@ -1,4 +1,4 @@
-name: Build Java to EXE
+name: Build Java to EXE and Release
 
 on:
   push:
@@ -7,6 +7,8 @@ on:
 jobs:
   build-windows:
     runs-on: windows-latest
+    permissions:
+      contents: write # נותן לשרת הרשאה ליצור Release חדש בפרויקט שלך
 
     steps:
     - name: Checkout Code
@@ -16,7 +18,7 @@ jobs:
       uses: graalvm/setup-graalvm@v1
       with:
         java-version: '21'
-        distribution: 'liberica' # הגרסה היחידה שתומכת בגרפיקה של המשחק
+        distribution: 'liberica'
         github-token: ${{ secrets.GITHUB_TOKEN }}
 
     - name: Compile Java Code
@@ -31,8 +33,13 @@ jobs:
       run: |
         mv RacingGame.exe RacingGame.dat
 
-    - name: Upload Artifact
-      uses: actions/upload-artifact@v4
+    - name: Create GitHub Release
+      uses: softprops/action-gh-release@v2
       with:
-        name: RacingGame-Package
-        path: RacingGame.dat
+        tag_name: v${{ github.run_number }}
+        name: Release v${{ github.run_number }}
+        draft: false
+        prerelease: false
+        files: RacingGame.dat
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
