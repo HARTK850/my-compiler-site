@@ -1,0 +1,35 @@
+name: Build Java to EXE
+
+on:
+  push:
+    branches: [ main ] # מפעיל את התהליך בכל פעם שאתה מעלה קוד לענף הראשי
+
+jobs:
+  build-windows:
+    runs-on: windows-latest # השרת של גיטהאב יריץ מערכת הפעלה ווינדוס
+
+    steps:
+    - name: Checkout Code
+      uses: actions/checkout@v4
+
+    - name: Setup GraalVM
+      uses: graalvm/setup-graalvm@v1
+      with:
+        java-version: '21' # גרסת הג'אווה הרצויה
+        distribution: 'graalvm'
+        components: 'native-image'
+        github-token: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Compile Java Code
+      run: |
+        javac RacingGame.java
+
+    - name: Convert JAR/Class to EXE
+      run: |
+        native-image --no-fallback -cp . RacingGame
+
+    - name: Upload EXE Artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: RacingGame-Windows-EXE
+        path: RacingGame.exe
