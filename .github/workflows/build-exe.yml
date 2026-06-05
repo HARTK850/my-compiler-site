@@ -12,20 +12,20 @@ jobs:
     - name: Checkout Code
       uses: actions/checkout@v4
 
-    - name: Setup Liberica NIK (GraalVM with AWT Support)
+    - name: Setup Official Oracle GraalVM (Safe for Filters)
       uses: graalvm/setup-graalvm@v1
       with:
         java-version: '21'
-        distribution: 'liberica'
+        distribution: 'graalvm' # חוזרים לגרסה הרשמית שלא נחסמת
         github-token: ${{ secrets.GITHUB_TOKEN }}
 
     - name: Compile Java Code
       run: |
         javac RacingGame.java
 
-    - name: Convert to EXE
+    - name: Convert to EXE with Graphics Support
       run: |
-        native-image --no-fallback -cp . RacingGame
+        native-image --no-fallback --initialize-at-build-time=java.awt.Color -cp . RacingGame
 
     - name: Upload EXE Artifact
       uses: actions/upload-artifact@v4
