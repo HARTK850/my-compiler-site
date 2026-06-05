@@ -16,16 +16,16 @@ jobs:
       uses: graalvm/setup-graalvm@v1
       with:
         java-version: '21'
-        distribution: 'graalvm' # חוזרים לגרסה הרשמית שלא נחסמת
+        distribution: 'graalvm' # הגרסה הרשמית והמוכרת שלא נחסמת בסינון
         github-token: ${{ secrets.GITHUB_TOKEN }}
 
     - name: Compile Java Code
       run: |
         javac RacingGame.java
 
-    - name: Convert to EXE with Graphics Support
+    - name: Convert to EXE with Safe Graphics Config
       run: |
-        native-image --no-fallback --initialize-at-build-time=java.awt.Color -cp . RacingGame
+        native-image --no-fallback --initialize-at-run-time=java.awt.Toolkit,java.awt.Insets,java.awt.Color,java.awt.Component,javax.swing.ImageIcon -cp . RacingGame
 
     - name: Upload EXE Artifact
       uses: actions/upload-artifact@v4
