@@ -2,34 +2,27 @@ name: Build Java to EXE
 
 on:
   push:
-    branches: [ main ] # מפעיל את התהליך בכל פעם שאתה מעלה קוד לענף הראשי
+    branches: [ main ]
 
 jobs:
   build-windows:
-    runs-on: windows-latest # השרת של גיטהאב יריץ מערכת הפעלה ווינדוס
+    runs-on: windows-latest
 
     steps:
     - name: Checkout Code
       uses: actions/checkout@v4
 
-    - name: Setup GraalVM
+    - name: Setup Liberica NIK (GraalVM with AWT Support)
       uses: graalvm/setup-graalvm@v1
       with:
-        java-version: '21' # גרסת הג'אווה הרצויה
-        distribution: 'graalvm'
-        components: 'native-image'
+        java-version: '21'
+        distribution: 'liberica' # שינוי ל-liberica שתומך בגרפיקה על ווינדוס
         github-token: ${{ secrets.GITHUB_TOKEN }}
 
     - name: Compile Java Code
       run: |
         javac RacingGame.java
 
-    - name: Convert JAR/Class to EXE
+    - name: Convert to GUI Windows EXE
       run: |
-        native-image --no-fallback -cp . RacingGame
-
-    - name: Upload EXE Artifact
-      uses: actions/upload-artifact@v4
-      with:
-        name: RacingGame-Windows-EXE
-        path: RacingGame.exe
+        native-image --no-fallback -H:Kind=WINDOWS_GUI -cp . RacingGame
