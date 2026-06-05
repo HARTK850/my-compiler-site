@@ -634,7 +634,7 @@ public class RacingGame extends JFrame {
             if (level < 3) {
                 drawButton(g, "UPGRADE ($" + cost + ")", 600, y, 200, 35, Color.DARK_GRAY);
             } else {
-                g.setColor(Color.GOLD);
+                g.setColor(new Color(212, 175, 55));
                 g.drawString("MAXED OUT", 600, y + 25);
             }
         }
@@ -804,7 +804,7 @@ public class RacingGame extends JFrame {
             g.setColor(new Color(10, 10, 20));
             g.fillRect(0, 0, WIDTH, HEIGHT);
             
-            g.setColor(Color.GOLD);
+            g.setColor(new Color(212, 175, 55));
             g.setFont(new Font("Arial", Font.BOLD, 48));
             g.drawString("RACE FINISHED!", 340, 200);
             
