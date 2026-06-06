@@ -18,7 +18,7 @@ jobs:
       uses: graalvm/setup-graalvm@v1
       with:
         java-version: '21'
-        distribution: 'liberica' # הפצה זו כוללת מראש את קובצי ה-DLL של AWT
+        distribution: 'liberica'
         github-token: ${{ secrets.GITHUB_TOKEN }}
 
     - name: Compile Java Code
@@ -28,12 +28,22 @@ jobs:
 
     - name: Convert to EXE
       run: |
-        # פקודה נקייה התואמת ל-GraalVM 21 ללא דגלים שהוסרו
-        native-image --no-fallback -H:+AddAllCharsets -jar RacingGame.jar RacingGame
+        native-image --no-fallback -jar RacingGame.jar RacingGame
 
-    - name: Bypass Filter (Rename EXE to DAT)
+    - name: Package DLLs for Standalone Run
       run: |
-        mv RacingGame.exe RacingGame.dat
+        # יצירת תיקייה ייעודית למשחק
+        mkdir GameRelease
+        
+        # העתקת קובץ ה-EXE לתיקייה
+        mv RacingGame.exe GameRelease/
+        
+        # איתור והעתקת קובץ ה-awt.dll וקובצי ה-java הדרושים מתוך ה-JDK של השרת
+        cp "$env:JAVA_HOME\bin\awt.dll" GameRelease/
+        cp "$env:JAVA_HOME\bin\java.dll" GameRelease/
+        
+        # כיווץ התיקייה לקובץ ZIP אחד מוכן להפצה
+        Compress-Archive -Path GameRelease\* -DestinationPath RacingGame_Standalone.zip
 
     - name: Create GitHub Release
       uses: softprops/action-gh-release@v2
@@ -42,6 +52,6 @@ jobs:
         name: Release v${{ github.run_number }}
         draft: false
         prerelease: false
-        files: RacingGame.dat
+        files: RacingGame_Standalone.zip
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
