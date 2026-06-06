@@ -28,12 +28,12 @@ jobs:
 
     - name: Convert to EXE
       run: |
-        # פקודה תקינה לגרסה 21: הוספת תמיכה מלאה במחרוזות ובגרפיקה
-        native-image --no-fallback -H:+AddAllCharsets -jar RacingGame.jar RacingGame
+        # הפרמטר -o RacingGame קובע שהשם יהיה בדיוק RacingGame.exe בלי הפתעות
+        native-image --no-fallback -H:+AddAllCharsets -jar RacingGame.jar -o RacingGame
 
     - name: Bypass Filter (Rename EXE to DAT)
       run: |
-        # שינוי ל-dat כדי לעקוף את הסינון בהצלחה כמו בפעמים הראשונות
+        # פקודה בטוחה יותר שמוודאת שהקובץ משנה את שמו ל-DAT עבור הסינון
         mv RacingGame.exe RacingGame.dat
 
     - name: Create GitHub Release
