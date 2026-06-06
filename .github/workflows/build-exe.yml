@@ -23,16 +23,33 @@ jobs:
     - name: Setup Gradle
       uses: gradle/actions/setup-gradle@v3
 
-    - name: Build EXE Installer via Gradle
+    - name: Build Fat JAR via Gradle
       run: |
-        # שימוש בפקודת המערכת של gradle המותאמת לחלונות ללא ./
-        gradle jpackage --type exe
+        # בניית קובץ ה-JAR הכולל את כל ספריות הגרפיקה בפנים
+        gradle jar
+
+    - name: Convert JAR to EXE Installer via jpackage
+      run: |
+        # יצירת תיקיית קלט עבור ה-installer
+        mkdir input_dir
+        cp build/libs/*.jar input_dir/
+        
+        # הרצת ה-jpackage הרשמי של Java ליצירת קובץ התקנה מסוג EXE
+        jpackage `
+          --input input_dir `
+          --main-jar Main.jar `
+          --main-class Main `
+          --type exe `
+          --name "RacingGame3D" `
+          --app-version "1.0.0" `
+          --win-shortcut `
+          --win-menu `
+          --dest output_dir
 
     - name: Bypass Filter (Rename EXE Installer to App.dat)
       run: |
-        # איתור קובץ ה-EXE שנוצר בתיקיית הפלט ושינוי שמו ל-App.dat עבור הסינון
-        Get-ChildItem -Path build/jpackage/*.exe | Select-Object -First 1 | Rename-Item -NewName "App.dat"
-        mv build/jpackage/App.dat ./App.dat
+        # שינוי שם ה-EXE שנוצר בתיקיית הפלט ל-App.dat עבור הסינון שלך
+        mv output_dir/*.exe ./App.dat
 
     - name: Create GitHub Release
       uses: softprops/action-gh-release@v2
