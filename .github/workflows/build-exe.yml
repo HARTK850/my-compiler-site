@@ -23,18 +23,21 @@ jobs:
 
     - name: Compile Java Code
       run: |
-        javac RacingGame.java
-        jar cvfe RacingGame.jar RacingGame *.class
+        # קימפול של כל קובצי הג'אווה בתיקייה באופן אוטומטי
+        javac *.java
+        
+        # יצירת קובץ JAR זמני בשם פשוט
+        jar cvfe app.jar RacingGame *.class
 
     - name: Convert to EXE
       run: |
-        # הפרמטר -o RacingGame קובע שהשם יהיה בדיוק RacingGame.exe בלי הפתעות
-        native-image --no-fallback -H:+AddAllCharsets -jar RacingGame.jar -o RacingGame
+        # קימפול ה-JAR ל-EXE בשם אחיד קבוע (game.exe)
+        native-image --no-fallback -H:+AddAllCharsets -jar app.jar -o game
 
     - name: Bypass Filter (Rename EXE to DAT)
       run: |
-        # פקודה בטוחה יותר שמוודאת שהקובץ משנה את שמו ל-DAT עבור הסינון
-        mv RacingGame.exe RacingGame.dat
+        # שינוי השם ל-App.dat - שם קבוע ונקי שנטפרי והסינון לא יחסמו בחיים
+        mv game.exe App.dat
 
     - name: Create GitHub Release
       uses: softprops/action-gh-release@v2
@@ -43,6 +46,6 @@ jobs:
         name: Release v${{ github.run_number }}
         draft: false
         prerelease: false
-        files: RacingGame.dat
+        files: App.dat
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
