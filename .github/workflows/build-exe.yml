@@ -1,4 +1,4 @@
-name: Build Java to EXE and Release
+name: Build Java Installer and Release
 
 on:
   push:
@@ -14,30 +14,36 @@ jobs:
     - name: Checkout Code
       uses: actions/checkout@v4
 
-    - name: Setup Liberica NIK (GraalVM with AWT Support)
-      uses: graalvm/setup-graalvm@v1
+    - name: Setup Java JDK
+      uses: actions/setup-java@v4
       with:
         java-version: '21'
-        distribution: 'liberica'
-        github-token: ${{ secrets.GITHUB_TOKEN }}
+        distribution: 'temurin' # הפצה יציבה ובטוחה ל-jpackage
 
     - name: Compile Java Code
       run: |
-        # קימפול של כל קובצי הג'אווה בתיקייה באופן אוטומטי
+        # יצירת תיקיית קלט עבור jpackage
+        mkdir input_dir
         javac *.java
-        
-        # יצירת קובץ JAR זמני בשם פשוט
-        jar cvfe app.jar RacingGame *.class
+        jar cvfe input_dir/RacingGame.jar RacingGame *.class
 
-    - name: Convert to EXE
+    - name: Build MSI Installer
       run: |
-        # קימפול ה-JAR ל-EXE בשם אחיד קבוע (game.exe)
-        native-image --no-fallback -H:+AddAllCharsets -jar app.jar -o game
+        # יצירת ההתקנה באופן רשמי בשם פשוט
+        jpackage `
+          --input input_dir `
+          --main-jar RacingGame.jar `
+          --main-class RacingGame `
+          --type msi `
+          --name "RacingGame" `
+          --app-version "1.0.0" `
+          --win-shortcut `
+          --win-menu
 
-    - name: Bypass Filter (Rename EXE to DAT)
+    - name: Bypass Filter (Rename Installer to App.dat)
       run: |
-        # שינוי השם ל-App.dat - שם קבוע ונקי שנטפרי והסינון לא יחסמו בחיים
-        mv game.exe App.dat
+        # שינוי שם קובץ ההתקנה לשם ניטרלי כדי שלא ייחסם בסינון בשום אופן
+        mv RacingGame-1.0.0.msi App.dat
 
     - name: Create GitHub Release
       uses: softprops/action-gh-release@v2
