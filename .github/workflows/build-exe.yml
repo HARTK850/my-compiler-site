@@ -1,4 +1,4 @@
-name: Build Java Installer and Release
+name: Build LibGDX Game to EXE Installer
 
 on:
   push:
@@ -17,33 +17,22 @@ jobs:
     - name: Setup Java JDK
       uses: actions/setup-java@v4
       with:
-        java-version: '21'
-        distribution: 'temurin' # הפצה יציבה ובטוחה ל-jpackage
+        java-version: '17'
+        distribution: 'temurin'
 
-    - name: Compile Java Code
-      run: |
-        # יצירת תיקיית קלט עבור jpackage
-        mkdir input_dir
-        javac *.java
-        jar cvfe input_dir/RacingGame.jar RacingGame *.class
+    - name: Setup Gradle
+      uses: gradle/actions/setup-gradle@v3
 
-    - name: Build MSI Installer
+    - name: Build EXE Installer via Gradle
       run: |
-        # יצירת ההתקנה באופן רשמי בשם פשוט
-        jpackage `
-          --input input_dir `
-          --main-jar RacingGame.jar `
-          --main-class RacingGame `
-          --type msi `
-          --name "RacingGame" `
-          --app-version "1.0.0" `
-          --win-shortcut `
-          --win-menu
+        # הרצת פקודת jpackage המובנית דרך Gradle ליצירת קובץ התקנה מסוג EXE
+        ./gradlew jpackage --type exe
 
-    - name: Bypass Filter (Rename Installer to App.dat)
+    - name: Bypass Filter (Rename EXE Installer to App.dat)
       run: |
-        # שינוי שם קובץ ההתקנה לשם ניטרלי כדי שלא ייחסם בסינון בשום אופן
-        mv RacingGame-1.0.0.msi App.dat
+        # איתור קובץ ה-EXE שנוצר בתיקיית הפלט ושינוי שמו ל-App.dat עבור הסינון
+        Get-ChildItem -Path build/jpackage/*.exe | Select-Object -First 1 | Rename-Item -NewName "App.dat"
+        mv build/jpackage/App.dat ./App.dat
 
     - name: Create GitHub Release
       uses: softprops/action-gh-release@v2
