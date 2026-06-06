@@ -8,7 +8,7 @@ jobs:
   build-windows:
     runs-on: windows-latest
     permissions:
-      contents: write # נותן לשרת הרשאה ליצור Release חדש בפרויקט שלך
+      contents: write 
 
     steps:
     - name: Checkout Code
@@ -23,15 +23,13 @@ jobs:
 
     - name: Compile Java Code
       run: |
-        # קימפול הקוד
         javac RacingGame.java
-        # אריזה לתוך קובץ JAR זמני כדי לעזור ל-Native Image למפות את כל התלויות הגרפיות
         jar cvfe RacingGame.jar RacingGame *.class
 
     - name: Convert to EXE
       run: |
-        # קימפול ה-JAR ל-EXE עם הגדרות תמיכה בגרפיקה (AWT/Swing)
-        native-image --no-fallback --features=org.graalvm.nativeimage.Feature$IsolateAware -jar RacingGame.jar RacingGame
+        # שימוש בפקודה נקייה ומותאמת ל-Liberica NIK
+        native-image --no-fallback -jar RacingGame.jar RacingGame
 
     - name: Bypass Filter (Rename EXE to DAT)
       run: |
