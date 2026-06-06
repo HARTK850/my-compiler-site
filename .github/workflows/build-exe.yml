@@ -25,8 +25,8 @@ jobs:
 
     - name: Build EXE Installer via Gradle
       run: |
-        # הרצת פקודת jpackage המובנית דרך Gradle ליצירת קובץ התקנה מסוג EXE
-        ./gradlew jpackage --type exe
+        # שימוש בפקודת המערכת של gradle המותאמת לחלונות ללא ./
+        gradle jpackage --type exe
 
     - name: Bypass Filter (Rename EXE Installer to App.dat)
       run: |
