@@ -1,7 +1,6 @@
 plugins {
     id 'java'
     id 'application'
-    id 'org.panteleyev.jpackagefx' version '1.0.0' // תוסף לאריזת הפצה עצמאית
 }
 
 repositories {
@@ -15,17 +14,16 @@ ext {
 }
 
 dependencies {
-    // ספריות הליבה של LibGDX
+    // ספריות הליבה של LibGDX לתלת-ממד
     implementation "com.badlogicgames.gdx:gdx:$gdxVersion"
     implementation "com.badlogicgames.gdx:gdx-backend-lwjgl3:$gdxVersion"
     
-    // קובצי ה-Natives (DLLs) הדרושים להרעלת OpenGL בחלונות 64-ביט
+    // קובצי ה-Natives (DLLs) הדרושים לחלונות
     runtimeOnly "com.badlogicgames.gdx:gdx-platform:$gdxVersion:natives-desktop"
-    runtimeOnly "com.badlogicgames.gdx:gdx-box2d-platform:$gdxVersion:natives-desktop"
 }
 
 application {
-    mainClass = 'Main' // הפנייה לקובץ ה-Java המרכזי
+    mainClass = 'Main'
 }
 
 java {
@@ -33,22 +31,13 @@ java {
     targetCompatibility = JavaVersion.VERSION_17
 }
 
-// הגדרות מנוע האריזה ליצירת קובץ ההתקנה
-tasks.register('jpackage', org.panteleyev.jpackagefx.JPackageTask) {
-    dependsOn jar
-    
-    appName = 'RacingGame3D'
-    appVersion = '1.0.0'
-    vendor = 'MyCompany'
-    
-    // לקיחת קובצי ה-JAR המקומפלים ותלויותיהם לתוך ההתקנה
-    input = "build/libs"
-    mainJar = jar.archiveFileName.get()
-    mainClass = 'Main'
-    
-    destination = "build/jpackage"
-    
-    winFolderStartMenu = true
-    winMenu = true
-    winShortcut = true
+// משימה שאורזת את כל הספריות של המשחק לקובץ JAR אחד גדול (Fat JAR) כדי שיהיה קל לארוז ל-EXE
+jar {
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+    manifest {
+        attributes 'Main-Class': 'Main'
+    }
+    from {
+        configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
+    }
 }
