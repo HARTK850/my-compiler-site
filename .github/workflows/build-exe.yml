@@ -32,7 +32,9 @@ jobs:
       run: |
         # יצירת תיקיית קלט עבור ה-installer
         mkdir input_dir
-        cp build/libs/*.jar input_dir/
+        
+        # העתקת קובץ ה-JAR ושינוי השם שלו באופן אוטומטי ל-Main.jar עבור ה-jpackage
+        Get-ChildItem -Path build/libs/*.jar | Select-Object -First 1 | Copy-Item -Destination "input_dir/Main.jar"
         
         # הרצת ה-jpackage הרשמי של Java ליצירת קובץ התקנה מסוג EXE
         jpackage `
