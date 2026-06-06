@@ -28,21 +28,22 @@ jobs:
 
     - name: Convert to EXE
       run: |
-        native-image --no-fallback -jar RacingGame.jar RacingGame
+        # הדגל -Djava.library.path=. אומר לתוכנה לחפש ספריות קודם כל בתיקייה המקומית שלה
+        native-image --no-fallback -Djava.library.path=. -jar RacingGame.jar RacingGame
 
     - name: Package DLLs for Standalone Run
       run: |
-        # יצירת תיקייה ייעודית למשחק
+        # יצירת תיקיית הפצה
         mkdir GameRelease
-        
-        # העתקת קובץ ה-EXE לתיקייה
         mv RacingGame.exe GameRelease/
         
-        # איתור והעתקת קובץ ה-awt.dll וקובצי ה-java הדרושים מתוך ה-JDK של השרת
+        # העתקת כל קובצי ה-DLL הדרושים לממשק גרפי של חלונות
         cp "$env:JAVA_HOME\bin\awt.dll" GameRelease/
         cp "$env:JAVA_HOME\bin\java.dll" GameRelease/
+        cp "$env:JAVA_HOME\bin\fontmanager.dll" GameRelease/
+        cp "$env:JAVA_HOME\bin\mlib_image.dll" GameRelease/
         
-        # כיווץ התיקייה לקובץ ZIP אחד מוכן להפצה
+        # אריזה לקובץ ZIP
         Compress-Archive -Path GameRelease\* -DestinationPath RacingGame_Standalone.zip
 
     - name: Create GitHub Release
