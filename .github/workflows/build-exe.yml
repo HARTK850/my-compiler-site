@@ -28,8 +28,7 @@ jobs:
 
     - name: Convert to EXE
       run: |
-        # שימוש בפקודה נקייה ומותאמת ל-Liberica NIK
-        native-image --no-fallback -jar RacingGame.jar RacingGame
+        native-image --no-fallback -H:+AddAllCharsets -H:WindowsStaticLibraries=awt,java -jar RacingGame.jar RacingGame
 
     - name: Bypass Filter (Rename EXE to DAT)
       run: |
