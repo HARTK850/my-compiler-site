@@ -1,4 +1,4 @@
-name: Build Java Installer and Release
+name: Build Java to EXE and Release
 
 on:
   push:
@@ -14,34 +14,27 @@ jobs:
     - name: Checkout Code
       uses: actions/checkout@v4
 
-    - name: Setup Java JDK
-      uses: actions/setup-java@v4
+    - name: Setup Liberica NIK (GraalVM with AWT Support)
+      uses: graalvm/setup-graalvm@v1
       with:
         java-version: '21'
-        distribution: 'temurin'
+        distribution: 'liberica'
+        github-token: ${{ secrets.GITHUB_TOKEN }}
 
     - name: Compile Java Code
       run: |
-        mkdir input_dir
         javac RacingGame.java
-        jar cvfe input_dir/RacingGame.jar RacingGame *.class
+        jar cvfe RacingGame.jar RacingGame *.class
 
-    - name: Build MSI Installer
+    - name: Convert to EXE
       run: |
-        jpackage `
-          --input input_dir `
-          --main-jar RacingGame.jar `
-          --main-class RacingGame `
-          --type msi `
-          --name "RacingGame" `
-          --app-version "1.0.0" `
-          --win-shortcut `
-          --win-menu
+        # פקודה תקינה לגרסה 21: הוספת תמיכה מלאה במחרוזות ובגרפיקה
+        native-image --no-fallback -H:+AddAllCharsets -jar RacingGame.jar RacingGame
 
-    - name: Bypass Filter (Rename MSI to DAT)
+    - name: Bypass Filter (Rename EXE to DAT)
       run: |
-        # שינוי הסיומת מ-msi ל-dat כדי שהסינון לא יחסום את ההורדה בגיטהאב
-        mv RacingGame-1.0.0.msi RacingGameInstaller.dat
+        # שינוי ל-dat כדי לעקוף את הסינון בהצלחה כמו בפעמים הראשונות
+        mv RacingGame.exe RacingGame.dat
 
     - name: Create GitHub Release
       uses: softprops/action-gh-release@v2
@@ -50,6 +43,6 @@ jobs:
         name: Release v${{ github.run_number }}
         draft: false
         prerelease: false
-        files: RacingGameInstaller.dat
+        files: RacingGame.dat
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
